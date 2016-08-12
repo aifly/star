@@ -76,7 +76,6 @@
 				var _this = this;
 
 				var canvas = $('#star'),
-				    context = canvas.getContext('2d'),
 				    stage = new createjs.Stage(canvas);
 
 				var data = {
@@ -89,7 +88,7 @@
 				};
 				this.setSize(canvas, data);
 
-				stage.addChild(data.container);
+				stage.addChildAt(data.container, 0);
 
 				var iNow = 0,
 				    halfImgWidth = 105;
@@ -123,23 +122,31 @@
 					circle.y = y;
 
 					circle.graphics.beginFill('#fff').drawCircle(0, 0, 40);
-					stage.addChild(circle);
+					stage.addChildAt(circle, 1);
 
-					var map = new createjs.Bitmap(person.src);
+					var img = $('#person' + (i + 1));
+
+					var map = new createjs.DOMElement(img);
 					map.x = person.x;
 					map.y = person.y;
 					map.scaleX = map.scaleY = .5;
 					map.alpha = 0;
-					stage.addChild(map);
+
+					stage.addChildAt(map, 2);
 
 					data.personInfo.push({
 						person: map,
 						circle: circle,
-						line: line
+						line: line,
+						personData: person
 					});
 				});
 
+				var drawLine = false;
+
 				this.showPerson(data.personInfo[0].circle).then(function () {
+
+					//data.personInfo[0].person.shadow =  new createjs.Shadow('#ff0',-10,10,20);
 
 					return _this.showPerson(data.personInfo[0].person);
 				}).then(function () {
@@ -206,7 +213,11 @@
 	    	this.getLine(2,4,halfImgWidth,data);
 	    	this.getLine(3,6,halfImgWidth,data);
 	    	this.getLine(3,7,halfImgWidth,data);*/
+					drawLine = true;
 
+					data.personInfo.forEach(function (p) {
+						stage.removeChild(p.circle);
+					});
 				});
 
 				createjs.MotionGuidePlugin.install(createjs.Tween);
@@ -218,6 +229,38 @@
 				createjs.Ticker.timingMode = createjs.Ticker.RAF;
 
 				createjs.Ticker.on('tick', function () {
+
+					data.personInfo.forEach(function (p) {
+						var s = p.personData;
+						s.iNowY++;
+						if (s.iNowY > s.yLife) {
+							s.iNowY = 0;
+							s.speedY *= -1;
+						}
+						s.iNowX += .6;
+						if (s.iNowX > s.xLife) {
+							s.iNowX = 0;
+							s.speedX *= -1;
+						}
+						p.person.x += s.speedX;
+						p.person.y += s.speedY;
+					});
+
+					if (drawLine) {
+						data.container.removeAllChildren();
+						data.personArr.forEach(function (person, i) {
+							var line = null;
+							if (data.personArr[i + 1]) {
+								line = new createjs.Shape();
+
+								line.graphics.beginStroke('#fff').setStrokeStyle(3).moveTo(data.personInfo[i].person.x + halfImgWidth, data.personInfo[i].person.y + halfImgWidth).lineTo(data.personArr[i + 1].x + halfImgWidth, data.personArr[i + 1].y + halfImgWidth);
+								//line.graphics.beginFill('red').drawCircle(this.moveTo[0],this.moveTo[1],120);
+
+								data.container.addChild(line);
+							}
+						});
+					}
+
 					stage.update();
 				});
 			},
@@ -252,8 +295,9 @@
 				});
 			}
 		};
-
-		util.init();
+		window.onload = function () {
+			util.init();
+		};
 	})(document);
 
 /***/ },
@@ -540,7 +584,7 @@
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
-		value: true
+	  value: true
 	});
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -595,49 +639,124 @@
 	    p8 = './assets/js/' + _assetsImages8Png2['default'],
 	    p9 = './assets/js/' + _assetsImages9Png2['default'],
 	    p10 = './assets/js/' + _assetsImages10Png2['default'];
+	[p1, p2, p3, p4, p5, p6, p7, p8, p9, p10].forEach(function (src, i) {
+
+	  var img = document.createElement('img');
+	  img.id = 'person' + (i + 1);
+	  img.className = 'person';
+	  img.style.animationDelay = Math.random() * 1000 + 200 + "ms";
+	  img.onload = function () {
+	    document.body.appendChild(img);
+	  };
+	  img.src = src;
+	});
+
+	function r(m, n) {
+	  return m + Math.random() * (n - m);
+	}
 
 	var personArr = function personArr(stage) {
-		return [{
-			x: 1648,
-			y: 276,
-			src: p1
-		}, {
-			x: 2090,
-			y: 90,
-			src: p2
-		}, {
-			x: 2480,
-			y: 188,
-			src: p3
-		}, {
-			x: 2832,
-			y: 328,
-			src: p4
-		}, {
-			x: 3008,
-			y: 88,
-			src: p5
-		}, {
-			x: 3400,
-			y: 324,
-			src: p6
-		}, {
-			x: 3204,
-			y: 704,
-			src: p7
-		}, {
-			x: 2492,
-			y: 730,
-			src: p8
-		}, {
-			x: 2168,
-			y: 528,
-			src: p9
-		}, {
-			x: 1748,
-			y: 630,
-			src: p10
-		}];
+	  return [{
+	    x: 1648,
+	    y: 276,
+	    src: p1,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 2090,
+	    y: 90,
+	    src: p2,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 2480,
+	    y: 188,
+	    src: p3,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 2832,
+	    y: 328,
+	    src: p4,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 3008,
+	    y: 88,
+	    src: p5,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 3400,
+	    y: 324,
+	    src: p6,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 3204,
+	    y: 704,
+	    src: p7,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 2492,
+	    y: 730,
+	    src: p8,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 2168,
+	    y: 528,
+	    src: p9,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }, {
+	    x: 1748,
+	    y: 630,
+	    src: p10,
+	    iNowX: 0,
+	    iNowY: 0,
+	    speedX: r(.07, .2),
+	    speedY: r(.01, .1),
+	    xLife: r(200, 280),
+	    yLife: r(200, 300)
+	  }];
 	};
 
 	exports['default'] = personArr;
@@ -653,7 +772,7 @@
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__.p + "57735f5e566698890a981481319eef24.png";
+	module.exports = __webpack_require__.p + "c96a82d684fd840b63eed6a76f6e93fe.png";
 
 /***/ },
 /* 17 */
@@ -665,7 +784,7 @@
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__.p + "aa80226254c693b12931c9a98a227d64.png";
+	module.exports = __webpack_require__.p + "346bf2bd1024a08f1e96b57d7c0a26c0.png";
 
 /***/ },
 /* 19 */

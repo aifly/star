@@ -36,6 +36,37 @@
 			transition: 1s .5s;
 		}
 
+		img{
+			border:none;
+			vertical-align: top;
+			position: absolute;
+			left: 0;
+			top: 0;
+		}
+		@keyframes sploosh {
+            0% {
+                box-shadow: 0 0 0 0px rgba(66, 166, 223, 0.5);
+                background: rgba(66, 166, 223, 0.9);
+            }
+            100% {
+                box-shadow: 0 0 0 80px rgba(66, 166, 223, 0);
+                background: rgba(66, 166, 223, .4);
+            }
+        }
+        @-webkit-keyframes sploosh {
+            0% {
+                box-shadow: 0 0 0 0px rgba(66, 166, 223, 0.5);
+                background: rgba(66, 166, 223, 0.9);
+            }
+            100% {
+                box-shadow: 0 0 0 80px rgba(66, 166, 223, 0);
+                background: rgba(66, 166, 223, 0.4);
+            }
+        }
+        .person{
+        	animation:sploosh 2.5s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+        	border-radius: 50%;
+        }
 	</style>
 </head>
 <body>
@@ -43,8 +74,10 @@
 	<div class="mask"></div>
 	<script src='./assets/js/createjs.js'></script>
 	<script src='./assets/js/index.js'></script>
+	
 		<!--
-		<script src='http://localhost:3000/index.js'></script>
+	<script src='http://localhost:3000/index.js'></script>	
+		
 	-->
 </body>
 </html>

@@ -26,7 +26,6 @@ import Line from './line.es6';
 			
 
 			var canvas = $('#star'),
-			context = canvas.getContext('2d'),
 			stage = new createjs.Stage(canvas);
 
 			
@@ -41,7 +40,7 @@ import Line from './line.es6';
 			}
 			this.setSize(canvas,data);
 
-			stage.addChild(data.container);
+			stage.addChildAt(data.container,0);
 
 			var iNow  = 0,
 			halfImgWidth = 105;
@@ -80,28 +79,36 @@ import Line from './line.es6';
 				circle.y = y;
 
 				circle.graphics.beginFill('#fff').drawCircle(0,0,40);
-				stage.addChild(circle);
+				stage.addChildAt(circle,1);
 
-				var map = new createjs.Bitmap(person.src);
+				var img = $('#person'+(i+1));
+
+				var map = new createjs.DOMElement(img);
 				map.x = person.x;
 				map.y = person.y;
 				map.scaleX = map.scaleY = .5;
 				map.alpha=0;
-				stage.addChild(map);
+				
+				stage.addChildAt(map,2);
 				
 
 				data.personInfo.push({
 					person:map,
 					circle:circle,
-					line:line
+					line:line,
+					personData :person
 				});
 			});
 
 
+			let drawLine = false;
 
 
 			this.showPerson(data.personInfo[0].circle).then(()=>{
 				
+				//data.personInfo[0].person.shadow =  new createjs.Shadow('#ff0',-10,10,20);
+
+
 				return this.showPerson(data.personInfo[0].person);
 			}).then(()=>{
 				return this.showPerson(data.personInfo[0].line);
@@ -167,6 +174,11 @@ import Line from './line.es6';
 					this.getLine(2,4,halfImgWidth,data);
 					this.getLine(3,6,halfImgWidth,data);
 					this.getLine(3,7,halfImgWidth,data);*/
+					drawLine = true;
+
+					data.personInfo.forEach(p=>{
+						stage.removeChild(p.circle);
+					});
 					
 			});
 
@@ -182,6 +194,42 @@ import Line from './line.es6';
 			createjs.Ticker.timingMode = createjs.Ticker.RAF;
 
 			createjs.Ticker.on('tick',()=>{
+
+				data.personInfo.forEach(p=>{
+					var s = p.personData;
+					 s.iNowY++;
+	                if (s.iNowY > s.yLife) {
+	                    s.iNowY = 0;
+	                    s.speedY *= -1;
+
+	                }
+		            s.iNowX+=.6;
+		            if (s.iNowX > s.xLife) {
+		                s.iNowX = 0;
+		                s.speedX *= -1;
+		            }
+		            p.person.x += s.speedX;
+		            p.person.y += s.speedY;
+				});
+
+				if(drawLine){
+					data.container.removeAllChildren();
+				data.personArr.forEach((person,i)=>{
+						var line = null;
+						if(data.personArr[i+1] ){
+							 line = new createjs.Shape();
+					
+							line.graphics.beginStroke('#fff').setStrokeStyle(3)
+							.moveTo(data.personInfo[i].person.x+ halfImgWidth,data.personInfo[i].person.y+ halfImgWidth)
+							.lineTo(data.personArr[i+1].x+ halfImgWidth,data.personArr[i+1].y+ halfImgWidth);
+					//line.graphics.beginFill('red').drawCircle(this.moveTo[0],this.moveTo[1],120);
+
+							
+							data.container.addChild(line);
+						}
+					});
+				}
+				
 				stage.update();
 			});
 		},
@@ -218,7 +266,6 @@ import Line from './line.es6';
 			});
 		}
 	}
-
-	util.init();
+	window.onload = ()=>{util.init()};
 
 }(document);
