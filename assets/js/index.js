@@ -197,7 +197,7 @@
 				}).then(function () {
 					return _this.showPerson(data.personInfo[9].person);
 				}).then(function () {
-					return _this.showPerson(data.personInfo[9].line);
+					$('.mask').classList.add('active');
 				}).then(function () {
 
 					/*	this.getLine(9,7,halfImgWidth,data);
@@ -206,7 +206,7 @@
 	    	this.getLine(2,4,halfImgWidth,data);
 	    	this.getLine(3,6,halfImgWidth,data);
 	    	this.getLine(3,7,halfImgWidth,data);*/
-					$('.mask').classList.add('active');
+
 				});
 
 				createjs.MotionGuidePlugin.install(createjs.Tween);

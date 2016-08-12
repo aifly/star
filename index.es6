@@ -158,7 +158,7 @@ import Line from './line.es6';
 			}).then(()=>{
 				return this.showPerson(data.personInfo[9].person);
 			}).then(()=>{
-				return this.showPerson(data.personInfo[9].line);
+				$('.mask').classList.add('active');
 			}).then(()=>{
 
 				/*	this.getLine(9,7,halfImgWidth,data);
@@ -167,8 +167,7 @@ import Line from './line.es6';
 					this.getLine(2,4,halfImgWidth,data);
 					this.getLine(3,6,halfImgWidth,data);
 					this.getLine(3,7,halfImgWidth,data);*/
-					$('.mask').classList.add('active');
-
+					
 			});
 
 			createjs.MotionGuidePlugin.install(createjs.Tween);
